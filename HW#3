@@ -1,0 +1,100 @@
+# Author:	Olarewaju Abraham
+# Date:		March 3, 2021
+# Description:	Assignment #3
+
+
+.data
+intialVal:    .word  0 # a place to store the random number
+
+intro: .asciiz " The initial value is: "
+newline: .asciiz " \n"
+
+.text
+
+	#Prints intial value
+	li   $v0, 4	
+	la   $a0, intro	
+	syscall		
+	
+	addi $t1, $zero, 0
+	
+	# set $a0 to seed value
+	li, $a0, 0xF00F5AA5
+	
+	#Loop to print 10 new values
+	function2:
+
+	#save new value to memory
+	sw, $a0, intialVal
+	
+	#prints new line after every value
+	li   $v0, 1	
+	syscall	
+	
+	li   $v0, 4	
+	la   $a0, newline
+	syscall
+	
+	#ends program after 10 new values printed (loops 10 times)
+	bgt $t1, 9, exit
+	addi $t1, $t1, 1
+	
+	#loads new lsfr for next 32 bit shift cycle
+	lw, $a0, intialVal
+	
+	addi $t0, $zero, 0
+	
+	#LOOP FOR 32 32 bit shift cycle
+	function:
+	
+	#bit 32
+	addi $t2, $zero, 1
+	and $s0, $a0, $t2
+	
+	#bit 30
+	sll $t2, $t2, 2
+	and $s1, $a0, $t2
+	srl $s1, $s1, 2
+	
+	#bit 26
+	sll $t2, $t2, 4
+	and $s2, $a0, $t2
+	srl $s2, $s2, 6
+	
+	#bit 25
+	sll $t2, $t2, 1
+	and $s3, $a0, $t2
+	srl $s3, $s3, 7
+	
+	#Xoring Bits
+	xor $t3, $s1, $s0
+	xor $t3, $t3, $s2
+	xor $t3, $t3, $s3
+	
+	# Placing the result in the msb of lfsr
+	sll $t3, $t3, 31
+	srl $a0, $a0, 1
+	add $a0, $a0, $t3
+	
+	#If the value shifted 32 times, print new value, if not repeat function
+	bgt $t0, 30, function2
+	addi $t0, $t0, 1
+	
+	j function
+	
+	#Program Ended
+	exit:
+	
+
+	
+	
+
+	
+	
+	
+	
+	
+	
+
+
+	
